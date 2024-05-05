@@ -20,7 +20,8 @@ var registered map[string]request
 var address string
 var port int
 var secret string
-var timeout string // Cadena indicando la duración del timeout
+var timeout string
+var duration time.Duration
 
 func listpendingrequests(w http.ResponseWriter, r *http.Request) {
 	log.Printf("/listpendingrequests/ Total pending requests: %d", len(registered))
@@ -63,12 +64,6 @@ func register(w http.ResponseWriter, r *http.Request) {
 		// Estrá registrado, compruebo desde cuando
 		elapsed := now.Sub(req.timestamp)
 		log.Printf("Solicitud registrada hace %s", elapsed)
-		duration, err := time.ParseDuration(timeout)
-		if err != nil {
-			log.Printf("Error en time.ParseDuration() de %s", timeout)
-			log.Printf("timeout incorrecto")
-			os.Exit(1)
-		}
 		log.Printf("Plazo %s", duration)
 		
 		// Comprobamos si ha pasado el timeout
@@ -93,6 +88,14 @@ func main() {
 	flag.StringVar(&timeout, "timeout", "23h", "Tiempo antes de registrar una nueva petición")
 
 	flag.Parse()
+
+	var err error
+	duration, err = time.ParseDuration(timeout)
+	if err != nil {
+		log.Printf("Error en time.ParseDuration() de %s", timeout)
+		log.Printf("timeout incorrecto")
+		os.Exit(1)
+	}
 
 	log.Printf("sirin -address %s -port %d -secret %s -timeout %s", address, port, secret, timeout)
 	
