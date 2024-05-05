@@ -51,32 +51,35 @@ func register(w http.ResponseWriter, r *http.Request) {
 		log.Printf("/register/ playbook=%s remoteaddress=%s error with net.SplitHostPort()", playbook, r.RemoteAddr)
 		return
 	}
-	log.Printf("/register/ playbook=%s addr=%s port=%s", playbook, addr, port)
+
+	message := fmt.Sprintf("/register/ playbook=%s addr=%s port=%s", playbook, addr, port)
 
 	now := time.Now()
 	// Buscamos si el equipo está registrado
 	req, ok := registered[addr]
 	if ok == false {
 		// No está registrado, lo añado
+		message = message + " newrequest=true"
 		registered[addr] = request{playbook, now}
-		log.Printf("Registro la nueva solicitud.")
 	} else {
 		// Estrá registrado, compruebo desde cuando
+		message = message + " newrequest=false"
 		elapsed := now.Sub(req.timestamp)
-		log.Printf("Solicitud registrada hace %s", elapsed)
-		log.Printf("Plazo %s", duration)
+		message = fmt.Sprintf("%s elapsed=%s timeout=%s", message, elapsed, duration)
 		
 		// Comprobamos si ha pasado el timeout
 		if elapsed > duration {
 			// Actualizo la solicitud
+			message = message + " updated"
 			registered[addr] = request{playbook, now}
-			log.Printf("Actualizo la solicitud")
 		} else {
-			log.Printf("No han transcurrido %s, no actualizo la solicitud", duration)
+			// Descarto la solicitud
+			message = message + " discarded"
 		}
 	}
 
-	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path)
+	log.Printf(message)
+	fmt.Fprintf(w, message)
 }
 
 func main() {
