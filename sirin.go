@@ -29,7 +29,7 @@ type request struct {
 	pending bool
 }
 
-var registered map[string]request
+var registered map[string]*request
 var address string
 var port int
 var secret string
@@ -49,7 +49,7 @@ func getHosts(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("/gethosts/ playbook=%s remoteaddress=%s error with net.SplitHostPort()", pb, r.RemoteAddr)
 		return
-	}wget http://127.0.0.1:8080/register/playbook1 -O /dev/null
+	}
 
 	message := fmt.Sprintf("/gethosts/ playbook=%s addr=%s port=%s", pb, addr, port)
 
@@ -59,9 +59,7 @@ func getHosts(w http.ResponseWriter, r *http.Request) {
 		if req.playbook == pb && req.pending == true {
 			count++
 			out = out + host + ","
-			//
-			// Falta marcar como false el estado pending de la solicitud
-			//
+			req.pending = false
 		}
 	}
 
@@ -129,7 +127,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 	if ok == false {
 		// No está registrado, lo añado
 		message = message + " newrequest=true"
-		registered[addr] = request{playbook, now, true}
+		registered[addr] = &request{playbook, now, true}
 	} else {
 		// Estrá registrado, compruebo desde cuando
 		message = message + " newrequest=false"
@@ -140,7 +138,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 		if elapsed > duration {
 			// Actualizo la solicitud
 			message = message + " updated"
-			registered[addr] = request{playbook, now, true}
+			registered[addr] = &request{playbook, now, true}
 		} else {
 			// Descarto la solicitud
 			message = message + " discarded"
@@ -152,7 +150,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	registered = make(map[string]request)
+	registered = make(map[string]*request)
 
 	flag.StringVar(&address, "address", "0.0.0.0", "Dirección para recibir peticiones")
 	flag.IntVar(&port, "port", 8080, "Puerto")
