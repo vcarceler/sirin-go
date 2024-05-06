@@ -95,16 +95,6 @@ func listpendingrequests(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, salida)
 }
 
-func load(w http.ResponseWriter, r *http.Request) {
-
-	// Cargo datos de prueba
-	registered["10.0.0.1"] = request{"playbook1", time.Now()}
-	registered["10.0.0.2"] = request{"playbook2", time.Now()}
-	registered["10.0.0.3"] = request{"playbook3", time.Now()}
-
-	fmt.Fprintf(w, "He cargado datos!")
-}
-
 func register(w http.ResponseWriter, r *http.Request) {
 	playbook := strings.TrimPrefix(r.URL.Path, "/register/")
 	addr, port, err := net.SplitHostPort(r.RemoteAddr)
@@ -166,7 +156,6 @@ func main() {
 	http.HandleFunc("/gethosts/{secret}/{playbook}", getHosts)
 	http.HandleFunc("/getnumberofrequests/", getNumberOfRequests)
 	http.HandleFunc("/listpendingrequests/", listpendingrequests)
-	http.HandleFunc("/load/", load)
 	http.HandleFunc("/register/", register)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
