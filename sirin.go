@@ -23,6 +23,38 @@ var secret string
 var timeout string
 var duration time.Duration
 
+func getHosts(w http.ResponseWriter, r *http.Request) {
+	sec := r.PathValue("secret")
+	pb := r.PathValue("playbook")
+
+	if sec != secret {
+		log.Printf("/gethosts/%s/%s playbook=%s remoteaddress=%s error='bad secret'", sec, pb, pb, r.RemoteAddr)
+		return
+	}
+
+	addr, port, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		log.Printf("/gethosts/ playbook=%s remoteaddress=%s error with net.SplitHostPort()", pb, r.RemoteAddr)
+		return
+	}
+
+	message := fmt.Sprintf("/gethosts/ playbook=%s addr=%s port=%s", pb, addr, port)
+
+	count := 0
+	out := ""
+	for host, req := range registered {
+		if req.playbook == pb {
+			count++
+			out = out + host + ","
+		}
+	}
+
+	message = fmt.Sprintf("%s count=%d hosts=%s", message, count, out)
+
+	log.Printf(message)
+	fmt.Fprintf(w, fmt.Sprintf("%s", out))
+}
+
 func getNumberOfRequests(w http.ResponseWriter, r *http.Request) {
 	playbook := strings.TrimPrefix(r.URL.Path, "/getnumberofrequests/")
 	addr, port, err := net.SplitHostPort(r.RemoteAddr)
@@ -47,7 +79,13 @@ func getNumberOfRequests(w http.ResponseWriter, r *http.Request) {
 }
 
 func listpendingrequests(w http.ResponseWriter, r *http.Request) {
-	log.Printf("/listpendingrequests/ Total pending requests: %d", len(registered))
+	_, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		log.Printf("/listpendingrequests/ remoteaddress=%s error with net.SplitHostPort()", r.RemoteAddr)
+		return
+	}
+
+	log.Printf("/listpendingrequests/ remoteaddress=%s count=%d",r.RemoteAddr, len(registered))
 
 	salida := ""
 	for host, req := range registered {
@@ -125,6 +163,7 @@ func main() {
 
 	log.Printf("sirin -address %s -port %d -secret %s -timeout %s", address, port, secret, timeout)
 	
+	http.HandleFunc("/gethosts/{secret}/{playbook}", getHosts)
 	http.HandleFunc("/getnumberofrequests/", getNumberOfRequests)
 	http.HandleFunc("/listpendingrequests/", listpendingrequests)
 	http.HandleFunc("/load/", load)
