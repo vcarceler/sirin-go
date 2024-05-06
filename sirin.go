@@ -23,6 +23,29 @@ var secret string
 var timeout string
 var duration time.Duration
 
+func getNumberOfRequests(w http.ResponseWriter, r *http.Request) {
+	playbook := strings.TrimPrefix(r.URL.Path, "/getnumberofrequests/")
+	addr, port, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		log.Printf("/getnumberofrequests/ playbook=%s remoteaddress=%s error with net.SplitHostPort()", playbook, r.RemoteAddr)
+		return
+	}
+
+	message := fmt.Sprintf("/getnumberofrequests/ playbook=%s addr=%s port=%s", playbook, addr, port)
+
+	count := 0
+	for _, req := range registered {
+		if req.playbook == playbook {
+			count++
+		}
+	}
+
+	message = fmt.Sprintf("%s count=%d", message, count)
+
+	log.Printf(message)
+	fmt.Fprintf(w, fmt.Sprintf("%d", count))
+}
+
 func listpendingrequests(w http.ResponseWriter, r *http.Request) {
 	log.Printf("/listpendingrequests/ Total pending requests: %d", len(registered))
 
@@ -102,6 +125,7 @@ func main() {
 
 	log.Printf("sirin -address %s -port %d -secret %s -timeout %s", address, port, secret, timeout)
 	
+	http.HandleFunc("/getnumberofrequests/", getNumberOfRequests)
 	http.HandleFunc("/listpendingrequests/", listpendingrequests)
 	http.HandleFunc("/load/", load)
 	http.HandleFunc("/register/", register)
