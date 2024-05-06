@@ -1,3 +1,4 @@
+[![Sirin y Alkonost](https://elpuig.xeill.net/Members/vcarceler/articulos/sirin/alkonost-sirin.jpg)](https://es.wikipedia.org/wiki/V%C3%ADktor_Vasnetsov)
 # Сирин / Sirin
 
 Sirin es un servicio web permite ejecutar `playbooks` de `Ansible` cuando los ordenadores lo solicitan evitando ejecuciones repetidas durante un periodo de tiempo `timeout`. Se trata de una reimplementación en Go de la [anterior versión implementada como una aplicación python/django](https://github.com/vcarceler/sirin).
