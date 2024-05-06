@@ -167,7 +167,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.Printf("sirin -address %s -port %d -secret %s -timeout %s", address, port, secret, timeout)
+	log.Printf("sirin -address %s -port %d -secret XXXX -timeout %s", address, port, timeout)
 	
 	http.HandleFunc("/gethosts/{secret}/{playbook}", getHosts)
 	http.HandleFunc("/getnumberofrequests/", getNumberOfRequests)
