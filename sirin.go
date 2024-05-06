@@ -1,3 +1,15 @@
+/* This program is free software: you can redistribute it and/or modify it under the 
+terms of the GNU General Public License as published by the Free Software 
+Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY 
+WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for 
+more details.
+
+You should have received a copy of the GNU General Public License along with this 
+program. If not, see <https://www.gnu.org/licenses/>.  */
+
 package main
 
 import (
@@ -14,6 +26,7 @@ import (
 type request struct {
 	playbook string
 	timestamp time.Time
+	pending bool
 }
 
 var registered map[string]request
@@ -36,16 +49,19 @@ func getHosts(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("/gethosts/ playbook=%s remoteaddress=%s error with net.SplitHostPort()", pb, r.RemoteAddr)
 		return
-	}
+	}wget http://127.0.0.1:8080/register/playbook1 -O /dev/null
 
 	message := fmt.Sprintf("/gethosts/ playbook=%s addr=%s port=%s", pb, addr, port)
 
 	count := 0
 	out := ""
 	for host, req := range registered {
-		if req.playbook == pb {
+		if req.playbook == pb && req.pending == true {
 			count++
 			out = out + host + ","
+			//
+			// Falta marcar como false el estado pending de la solicitud
+			//
 		}
 	}
 
@@ -89,7 +105,9 @@ func listpendingrequests(w http.ResponseWriter, r *http.Request) {
 
 	salida := ""
 	for host, req := range registered {
-		salida = salida + fmt.Sprintf("%s %s %s\n", req.timestamp.Format("2006-01-02 15:04:05.00"), host, req.playbook)
+		if req.pending == true {
+			salida = salida + fmt.Sprintf("%s %s %s\n", req.timestamp.Format("2006-01-02 15:04:05.00"), host, req.playbook)
+		}
 	}
 
 	fmt.Fprintf(w, salida)
@@ -111,7 +129,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 	if ok == false {
 		// No está registrado, lo añado
 		message = message + " newrequest=true"
-		registered[addr] = request{playbook, now}
+		registered[addr] = request{playbook, now, true}
 	} else {
 		// Estrá registrado, compruebo desde cuando
 		message = message + " newrequest=false"
@@ -122,7 +140,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 		if elapsed > duration {
 			// Actualizo la solicitud
 			message = message + " updated"
-			registered[addr] = request{playbook, now}
+			registered[addr] = request{playbook, now, true}
 		} else {
 			// Descarto la solicitud
 			message = message + " discarded"
