@@ -12,7 +12,7 @@ Está pensado para que cada ordenador haga una petición a Sirin (normalmente en
 
 El equipo encargado de ejecutar los `playbooks` de `ansible`(en nuestro instituto [Baba-yaga](https://elpuig.xeill.net/Members/vcarceler/articulos/baba-yaga-renueva-su-hogar)) puede consultar periódicamente (en nuestro instituto cada 5 minutos) la lista de equipos que se han registrado para un determinado `playbook`. Sirin devolverá la lista de direcciones IP (separadas por `,`) para que sea posible lanzar `ansible-playbook` utilizando el parámetro `--limit=` de manera que la ejecución del `playbook` se limite a los equipos registrados.
 
-Cuando Sirin devuelve una lista de equipos entiende que esas peticiones ya han sido procesadas y las elimina.
+Cuando Sirin devuelve una lista de equipos (`/gethosts/`) marca esas peticiones como procesadas.
 
 # Instalación de Sirin
 
@@ -67,7 +67,7 @@ Durante el funcionamiento se irán registrando las solicitudes recibidas:
 
 ~~~
 vcarceler@sputnik:~/dev/sirin-go$ ./sirin-go -secret AsÑlkYh -timeout 30s
-2024/05/06 16:41:35 sirin -address 0.0.0.0 -port 8080 -secret AsÑlkYh -timeout 30s
+2024/05/06 16:41:35 sirin -address 0.0.0.0 -port 8080 -secret XXXX -timeout 30s
 2024/05/06 16:41:46 /register/ playbook=playbook1 addr=127.0.0.1 port=40402 newrequest=true
 2024/05/06 16:41:51 /register/ playbook=playbook1 addr=127.0.0.1 port=58372 newrequest=false elapsed=5.110746816s timeout=30s discarded
 2024/05/06 16:42:18 /register/ playbook=playbook1 addr=127.0.0.1 port=49332 newrequest=false elapsed=32.090897384s timeout=30s updated
