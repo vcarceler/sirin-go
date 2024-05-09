@@ -81,7 +81,7 @@ func getNumberOfRequests(w http.ResponseWriter, r *http.Request) {
 
 	count := 0
 	for _, req := range registered {
-		if req.playbook == playbook {
+		if req.playbook == playbook && req.pending == true {
 			count++
 		}
 	}
@@ -92,7 +92,7 @@ func getNumberOfRequests(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, fmt.Sprintf("%d", count))
 }
 
-func listpendingrequests(w http.ResponseWriter, r *http.Request) {
+func listPendingRequests(w http.ResponseWriter, r *http.Request) {
 	_, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		log.Printf("/listpendingrequests/ remoteaddress=%s error with net.SplitHostPort()", r.RemoteAddr)
@@ -171,7 +171,7 @@ func main() {
 	
 	http.HandleFunc("/gethosts/{secret}/{playbook}", getHosts)
 	http.HandleFunc("/getnumberofrequests/", getNumberOfRequests)
-	http.HandleFunc("/listpendingrequests/", listpendingrequests)
+	http.HandleFunc("/listpendingrequests/", listPendingRequests)
 	http.HandleFunc("/register/", register)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
