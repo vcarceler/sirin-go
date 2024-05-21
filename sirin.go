@@ -129,7 +129,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 		message = message + " newrequest=true"
 		registered[addr] = &request{playbook, now, true}
 	} else {
-		// Estrá registrado, compruebo desde cuando
+		// Está registrado, compruebo desde cuando
 		message = message + " newrequest=false"
 		elapsed := now.Sub(req.timestamp)
 		message = fmt.Sprintf("%s elapsed=%s timeout=%s", message, elapsed, duration)
