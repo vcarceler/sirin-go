@@ -1,13 +1,13 @@
-/* This program is free software: you can redistribute it and/or modify it under the 
-terms of the GNU General Public License as published by the Free Software 
+/* This program is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 more details.
 
-You should have received a copy of the GNU General Public License along with this 
+You should have received a copy of the GNU General Public License along with this
 program. If not, see <https://www.gnu.org/licenses/>.  */
 
 package main
@@ -24,9 +24,9 @@ import (
 )
 
 type request struct {
-	playbook string
+	playbook  string
 	timestamp time.Time
-	pending bool
+	pending   bool
 }
 
 var registered map[string]*request
@@ -99,7 +99,7 @@ func listPendingRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("/listpendingrequests/ remoteaddress=%s count=%d",r.RemoteAddr, len(registered))
+	log.Printf("/listpendingrequests/ remoteaddress=%s count=%d", r.RemoteAddr, len(registered))
 
 	salida := ""
 	for host, req := range registered {
@@ -133,7 +133,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 		message = message + " newrequest=false"
 		elapsed := now.Sub(req.timestamp)
 		message = fmt.Sprintf("%s elapsed=%s timeout=%s", message, elapsed, duration)
-		
+
 		// Comprobamos si ha pasado el timeout
 		if elapsed > duration {
 			// Actualizo la solicitud
@@ -168,11 +168,12 @@ func main() {
 	}
 
 	log.Printf("sirin -address %s -port %d -secret XXXX -timeout %s", address, port, timeout)
-	
+
 	http.HandleFunc("/gethosts/{secret}/{playbook}", getHosts)
 	http.HandleFunc("/getnumberofrequests/", getNumberOfRequests)
 	http.HandleFunc("/listpendingrequests/", listPendingRequests)
 	http.HandleFunc("/register/", register)
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	addr := fmt.Sprintf("%s:%d", address, port)
+	log.Fatal(http.ListenAndServe(addr, nil))
 }
